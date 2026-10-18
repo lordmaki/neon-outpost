@@ -40,7 +40,7 @@
         font-size: 10px; font-weight: 800; text-shadow: 0 1px 3px #000; letter-spacing: 0.5px;
     }
 
-    /* Нижний магазин улучшений и оружия */
+    /* Магазин */
     #shop-bar {
         position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
         display: flex; gap: 6px; background: rgba(12, 17, 26, 0.92);
@@ -53,15 +53,14 @@
         border: 1px solid #2b3d59; color: #e0f7fa;
         padding: 6px 10px; border-radius: 8px; cursor: pointer;
         display: flex; flex-direction: column; align-items: center; min-width: 95px;
-        flex-shrink: 0;
-        transition: all 0.12s;
+        flex-shrink: 0; transition: all 0.12s;
     }
     .shop-btn:hover { border-color: #00e5ff; transform: translateY(-2px); background: #1c2940; }
     .shop-btn .key { font-size: 9px; color: #00e5ff; margin-bottom: 2px; font-weight: 800; }
     .shop-btn .title { font-size: 11px; font-weight: 700; margin-bottom: 2px; text-align: center; }
     .shop-btn .cost { font-size: 11px; color: #ffd740; font-weight: 800; }
 
-    /* Панель управления слева */
+    /* Панель подсказок слева */
     #side-panel {
         position: fixed; top: 12px; left: 12px;
         background: rgba(12, 17, 26, 0.88); border: 1px solid rgba(255,255,255,0.15);
@@ -71,14 +70,11 @@
     #side-panel b { color: #fff; }
     .vol-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
     input[type=range] { width: 80px; accent-color: #00e5ff; cursor: pointer; }
+    @media (max-width: 768px) { #side-panel { display: none; } }
 
-    @media (max-width: 768px) {
-        #side-panel { display: none; } /* Скрываем подсказки на телефонах ради экономии места */
-    }
-
-    /* Экран старта / поражения */
+    /* Оверлей меню / перков / поражения */
     #overlay {
-        position: fixed; inset: 0; background: rgba(5, 8, 14, 0.9);
+        position: fixed; inset: 0; background: rgba(5, 8, 14, 0.92);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         z-index: 50; backdrop-filter: blur(6px); padding: 20px; text-align: center;
     }
@@ -94,14 +90,22 @@
         box-shadow: 0 0 25px rgba(0, 198, 255, 0.5); transition: transform 0.15s;
     }
     .start-btn:hover { transform: scale(1.06); }
+
+    /* Мобильная кнопка рывка */
+    #dash-btn {
+        position: fixed; bottom: 85px; right: 20px; width: 64px; height: 64px;
+        background: rgba(0, 229, 255, 0.2); border: 2px solid #00e5ff; border-radius: 50%;
+        display: none; align-items: center; justify-content: center; font-weight: 800; font-size: 12px;
+        color: #00e5ff; z-index: 20; touch-action: none;
+    }
 </style>
 </head>
 <body>
 
 <div id="side-panel">
-    <div><b>WASD / Стрелки</b> — Движение</div>
+    <div><b>WASD / Джойстик</b> — Движение</div>
     <div><b>ЛКМ / Тап</b> — Стрельба</div>
-    <div><b>ПРОБЕЛ</b> — Рывок</div>
+    <div><b>ПРОБЕЛ / Кнопка</b> — Рывок</div>
     <div><b>Клавиши 1–6</b> — Магазин</div>
     <div class="vol-row">
         <span>🔈 Звук:</span>
@@ -128,41 +132,19 @@
 </div>
 
 <div id="shop-bar">
-    <button class="shop-btn" onclick="buyUpgrade(1)">
-        <span class="key">[1] ОРУЖИЕ</span>
-        <span class="title" id="wpn-title">Дробовик</span>
-        <span class="cost" id="wpn-cost">$150</span>
-    </button>
-    <button class="shop-btn" onclick="buyUpgrade(2)">
-        <span class="key">[2] УРОН +25%</span>
-        <span class="title" id="dmg-title">Уровень 1</span>
-        <span class="cost" id="dmg-cost">$80</span>
-    </button>
-    <button class="shop-btn" onclick="buyUpgrade(3)">
-        <span class="key">[3] ТУРЕЛЬ</span>
-        <span class="title">Поставить</span>
-        <span class="cost" id="tur-cost">$120</span>
-    </button>
-    <button class="shop-btn" onclick="buyUpgrade(4)">
-        <span class="key">[4] ГЕНЕРАТОР</span>
-        <span class="title">+12$ / сек</span>
-        <span class="cost" id="gen-cost">$100</span>
-    </button>
-    <button class="shop-btn" onclick="buyUpgrade(5)">
-        <span class="key">[5] ТЕСЛА</span>
-        <span class="title">Цепная молния</span>
-        <span class="cost" id="tes-cost">$250</span>
-    </button>
-    <button class="shop-btn" onclick="buyUpgrade(6)">
-        <span class="key">[6] РЕМОНТ</span>
-        <span class="title">Лечение базы</span>
-        <span class="cost">$90</span>
-    </button>
+    <button class="shop-btn" onclick="buyUpgrade(1)"><span class="key">[1] ОРУЖИЕ</span><span class="title" id="wpn-title">Дробовик</span><span class="cost" id="wpn-cost">$150</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(2)"><span class="key">[2] УРОН</span><span class="title" id="dmg-title">Ур. 1</span><span class="cost" id="dmg-cost">$80</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(3)"><span class="key">[3] ТУРЕЛЬ</span><span class="title">Защита</span><span class="cost" id="tur-cost">$120</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(4)"><span class="key">[4] ГЕНЕРАТОР</span><span class="title">+12$/сек</span><span class="cost" id="gen-cost">$100</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(5)"><span class="key">[5] ТЕСЛА</span><span class="title">Молния</span><span class="cost" id="tes-cost">$250</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(6)"><span class="key">[6] ДРОН</span><span class="title">Боевой дрон</span><span class="cost" id="drn-cost">$300</span></button>
 </div>
+
+<div id="dash-btn" onclick="triggerDash()">РЫВОК</div>
 
 <div id="overlay">
     <h1 id="ov-title">NEON OUTPOST</h1>
-    <p id="ov-desc">Защищай Энергетическое Ядро от волн мутантов и кибер-боссов. Играй на ПК или прямо с экрана телефона!</p>
+    <p id="ov-desc">Защищай Энергетическое Ядро от волн мутантов. Используй левый стик на телефоне для бега и тапай для стрельбы!</p>
     <button class="start-btn" onclick="startGame()">НАЧАТЬ ОБОРОНУ</button>
 </div>
 
@@ -175,70 +157,55 @@ const ctx = canvas.getContext('2d');
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    if ('ontouchstart' in window) {
+        document.getElementById('dash-btn').style.display = 'flex';
+    }
 }
 window.addEventListener('resize', resize);
 resize();
 
 // ============================================================================
-// ВСТРОЕННЫЙ СИНТЕЗАТОР ЗВУКОВ (WEB AUDIO API)
+// АУДИО СИНТЕЗАТОР
 // ============================================================================
 let audioCtx = null;
 function playSfx(type) {
-    const volSlider = document.getElementById('volSlider');
-    const masterVol = volSlider ? parseFloat(volSlider.value) : 0.25;
+    const masterVol = parseFloat(document.getElementById('volSlider').value);
     if (masterVol <= 0) return;
-
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    osc.connect(gain); gain.connect(audioCtx.destination);
 
     if (type === 'shoot') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(520, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
-        gain.gain.setValueAtTime(masterVol * 0.35, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.09);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(520, now); osc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
+        gain.gain.setValueAtTime(masterVol * 0.35, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.09);
         osc.start(now); osc.stop(now + 0.09);
     } else if (type === 'rail') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(70, now + 0.22);
-        gain.gain.setValueAtTime(masterVol * 0.45, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.type = 'square'; osc.frequency.setValueAtTime(880, now); osc.frequency.exponentialRampToValueAtTime(70, now + 0.22);
+        gain.gain.setValueAtTime(masterVol * 0.45, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
         osc.start(now); osc.stop(now + 0.22);
     } else if (type === 'hit') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.exponentialRampToValueAtTime(55, now + 0.06);
-        gain.gain.setValueAtTime(masterVol * 0.25, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.06);
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(180, now); osc.frequency.exponentialRampToValueAtTime(55, now + 0.06);
+        gain.gain.setValueAtTime(masterVol * 0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.06);
         osc.start(now); osc.stop(now + 0.06);
     } else if (type === 'buy') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(660, now + 0.06);
-        gain.gain.setValueAtTime(masterVol * 0.4, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(660, now + 0.06);
+        gain.gain.setValueAtTime(masterVol * 0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
         osc.start(now); osc.stop(now + 0.16);
     } else if (type === 'boom') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(130, now);
-        osc.frequency.exponentialRampToValueAtTime(28, now + 0.25);
-        gain.gain.setValueAtTime(masterVol * 0.5, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(130, now); osc.frequency.exponentialRampToValueAtTime(28, now + 0.25);
+        gain.gain.setValueAtTime(masterVol * 0.5, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
         osc.start(now); osc.stop(now + 0.25);
     }
 }
 
 // ============================================================================
-// ИГРОВЫЕ ПЕРЕМЕННЫЕ И ДАННЫЕ
+// ДАННЫЕ ИГРЫ
 // ============================================================================
-const WORLD_SIZE = 2200;
+const WORLD_SIZE = 2400;
 const CORE_POS = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
 
 const WEAPONS = [
@@ -249,27 +216,24 @@ const WEAPONS = [
     { name: "Аннигилятор (Финал)", fireRate: 0.12, bullets: 3, spread: 0.2, speed: 20, dmg: 55, color: "#00e676", size: 6, pierce: true, cost: 1500 }
 ];
 
-let gameRunning = false;
-let gold = 150;
-let passiveIncome = 5;
-let kills = 0;
-let wave = 1;
-let enemiesToSpawn = 0;
-let spawnCooldown = 0;
-let screenShake = 0;
+let gameRunning = false, perkChoosing = false;
+let gold = 150, passiveIncome = 5, kills = 0, wave = 1;
+let enemiesToSpawn = 0, spawnCooldown = 0, screenShake = 0;
 
 let player, core;
-let bullets = [], enemies = [], turrets = [], generators = [], teslas = [], particles = [], floatTexts = [], gems = [];
+let bullets = [], enemies = [], turrets = [], generators = [], teslas = [], drones = [], particles = [], floatTexts = [], gems = [];
 let wpnIndex = 0, dmgLevel = 1, dmgMultiplier = 1;
-let costs = { dmg: 80, tur: 120, gen: 100, tes: 250 };
+let costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 300 };
 
 const keys = {};
 const mouse = { x: 0, y: 0, down: false };
 
-// Управление с клавиатуры и мыши
+// Виртуальный джойстик для телефона (Левая сторона экрана)
+let joystick = { active: false, id: null, startX: 0, startY: 0, x: 0, y: 0, dx: 0, dy: 0 };
+
 window.addEventListener('keydown', e => {
     keys[e.code] = true;
-    if (!gameRunning) return;
+    if (!gameRunning || perkChoosing) return;
     if (e.code === 'Digit1') buyUpgrade(1);
     if (e.code === 'Digit2') buyUpgrade(2);
     if (e.code === 'Digit3') buyUpgrade(3);
@@ -279,67 +243,154 @@ window.addEventListener('keydown', e => {
     if (e.code === 'Space') triggerDash();
 });
 window.addEventListener('keyup', e => keys[e.code] = false);
+
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 window.addEventListener('mousedown', e => { if (e.button === 0) mouse.down = true; });
 window.addEventListener('mouseup', e => { if (e.button === 0) mouse.down = false; });
 
-// Адаптивное сенсорное управление для смартфонов и планшетов
+// Мультитач для телефона (Левый стик + Правая стрельба)
 window.addEventListener('touchstart', e => {
-    if (!gameRunning) return;
-    mouse.down = true;
-    const touch = e.touches[0];
-    mouse.x = touch.clientX;
-    mouse.y = touch.clientY;
-});
+    if (!gameRunning || perkChoosing) return;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.clientX < window.innerWidth / 2 && !joystick.active) {
+            joystick.active = true;
+            joystick.id = t.identifier;
+            joystick.startX = t.clientX; joystick.startY = t.clientY;
+            joystick.x = t.clientX; joystick.y = t.clientY;
+            joystick.dx = 0; joystick.dy = 0;
+        } else {
+            mouse.down = true;
+            mouse.x = t.clientX; mouse.y = t.clientY;
+        }
+    }
+}, {passive: false});
+
 window.addEventListener('touchmove', e => {
-    if (!gameRunning) return;
-    const touch = e.touches[0];
-    mouse.x = touch.clientX;
-    mouse.y = touch.clientY;
+    if (!gameRunning || perkChoosing) return;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.identifier === joystick.id) {
+            const maxR = 50;
+            let dx = t.clientX - joystick.startX;
+            let dy = t.clientY - joystick.startY;
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxR) { dx = (dx / dist) * maxR; dy = (dy / dist) * maxR; }
+            joystick.x = joystick.startX + dx; joystick.y = joystick.startY + dy;
+            joystick.dx = dx / maxR; joystick.dy = dy / maxR;
+        } else {
+            mouse.x = t.clientX; mouse.y = t.clientY;
+        }
+    }
+}, {passive: false});
+
+window.addEventListener('touchend', e => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.identifier === joystick.id) {
+            joystick.active = false; joystick.id = null; joystick.dx = 0; joystick.dy = 0;
+        } else {
+            mouse.down = false;
+        }
+    }
 });
-window.addEventListener('touchend', () => { mouse.down = false; });
 
 function startGame() {
     document.getElementById('overlay').style.display = 'none';
     gold = 150; passiveIncome = 5; kills = 0; wave = 1;
     wpnIndex = 0; dmgLevel = 1; dmgMultiplier = 1;
-    costs = { dmg: 80, tur: 120, gen: 100, tes: 250 };
+    costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 300 };
 
     player = {
-        x: CORE_POS.x, y: CORE_POS.y + 90,
-        vx: 0, vy: 0, speed: 4.5, radius: 16,
-        hp: 100, maxHp: 100, fireCd: 0,
-        dashCd: 0, dashTime: 0, angle: 0
+        x: CORE_POS.x, y: CORE_POS.y + 100,
+        speed: 4.8, radius: 16, hp: 100, maxHp: 100,
+        fireCd: 0, dashCd: 0, dashTime: 0, angle: 0,
+        vampirism: 0, doubleShot: false
     };
     core = { x: CORE_POS.x, y: CORE_POS.y, hp: 1000, maxHp: 1000, radius: 42, angle: 0 };
 
-    bullets = []; enemies = []; turrets = []; generators = []; teslas = []; particles = []; floatTexts = []; gems = [];
+    bullets = []; enemies = []; turrets = []; generators = []; teslas = []; drones = []; particles = []; floatTexts = []; gems = [];
     startWave(1);
     updateShopUI();
-    gameRunning = true;
+    gameRunning = true; perkChoosing = false;
 }
 
 function startWave(w) {
     wave = w;
-    enemiesToSpawn = 6 + w * 4;
+    enemiesToSpawn = 6 + w * 5;
     spawnCooldown = 1.0;
-    addFloatText(player.x, player.y - 40, "ВОЛНА " + w + " НАЧАЛАСЬ!", "#00e5ff", 22);
-    if (w % 3 === 0) {
+    addFloatText(player.x, player.y - 40, "ВОЛНА " + w, "#00e5ff", 22);
+    
+    // Каждые 3 волны — выбор перков
+    if (w > 1 && (w - 1) % 3 === 0) {
+        showPerkChooser();
+    } else if (w % 3 === 0) {
         spawnEnemy('boss');
-        addFloatText(CORE_POS.x, CORE_POS.y - 70, "⚠️ ПОЯВИЛСЯ КИБЕР-ТИТАН!", "#e040fb", 26);
+        addFloatText(CORE_POS.x, CORE_POS.y - 70, "⚠️ ПОЯВИЛСЯ БОСС!", "#e040fb", 26);
     }
 }
 
 function triggerDash() {
-    if (player.dashCd > 0) return;
-    player.dashCd = 2.0;
+    if (player.dashCd > 0 || perkChoosing) return;
+    player.dashCd = 1.8;
     player.dashTime = 0.22;
     playSfx('rail');
     for (let i = 0; i < 14; i++) spawnParticle(player.x, player.y, "#00e5ff", 4);
 }
 
 // ============================================================================
-// МАГАЗИН И УЛУЧШЕНИЯ
+// СИСТЕМА ПЕРКОВ (КАЖДЫЕ 3 ВОЛНЫ)
+// ============================================================================
+function showPerkChooser() {
+    perkChoosing = true;
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = 'flex';
+    document.getElementById('ov-title').innerText = "ВЫБЕРИТЕ УЛУЧШЕНИЕ";
+    document.getElementById('ov-desc').innerText = "Ваша база выстояла! Получите мощный бонус на выбор:";
+
+    const perks = [
+        { title: "💉 Нано-Вампиризм", desc: "+12% от нанесеного урона лечит игрока", action: () => { player.vampirism += 0.12; } },
+        { title: "⚡ Квантовый Разгон", desc: "Скорость бега и скорострельность +25%", action: () => { player.speed *= 1.25; WEAPONS.forEach(w => w.fireRate *= 0.8); } },
+        { title: "🛡️ Усиление Ядра", desc: "Восстанавливает +400 HP Ядру и увеличивает макс. HP", action: () => { core.maxHp += 400; core.hp = core.maxHp; } },
+        { title: "💥 Двойной Заряд", desc: "Все пушки и оружие выпускают дополнительный снаряд", action: () => { player.doubleShot = true; } }
+    ];
+
+    // Выбираем 3 случайных перка
+    perks.sort(() => Math.random() - 0.5);
+    const chosen = perks.slice(0, 3);
+
+    let html = `<div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; margin-top:15px;">`;
+    chosen.forEach((p, idx) => {
+        html += `<button onclick="selectPerk(${idx})" style="background:#162032; border:2px solid #00e5ff; color:#fff; padding:15px 20px; border-radius:12px; cursor:pointer; max-width:200px; text-align:left;">
+            <div style="font-weight:800; color:#00e5ff; margin-bottom:6px;">${p.title}</div>
+            <div style="font-size:12px; color:#b0bec5; line-height:1.4;">${p.desc}</div>
+        </button>`;
+    });
+    html += `</div>`;
+    
+    // Заменяем кнопку старта на перки
+    overlay.querySelector('button').style.display = 'none';
+    let perkBox = document.getElementById('perk-container');
+    if (!perkBox) {
+        perkBox = document.createElement('div');
+        perkBox.id = 'perk-container';
+        overlay.appendChild(perkBox);
+    }
+    perkBox.innerHTML = html;
+    window.currentPerks = chosen;
+}
+
+window.selectPerk = function(idx) {
+    window.currentPerks[idx].action();
+    playSfx('buy');
+    document.getElementById('perk-container').innerHTML = '';
+    document.getElementById('overlay').querySelector('button').style.display = 'block';
+    document.getElementById('overlay').style.display = 'none';
+    perkChoosing = false;
+};
+
+// ============================================================================
+// МАГАЗИН
 // ============================================================================
 function updateShopUI() {
     const nextWpn = WEAPONS[wpnIndex + 1];
@@ -350,76 +401,65 @@ function updateShopUI() {
     document.getElementById('tur-cost').innerText = "$" + costs.tur;
     document.getElementById('gen-cost').innerText = "$" + costs.gen;
     document.getElementById('tes-cost').innerText = "$" + costs.tes;
+    document.getElementById('drn-cost').innerText = "$" + costs.drn;
 }
 
 function buyUpgrade(id) {
-    if (!gameRunning) return;
+    if (!gameRunning || perkChoosing) return;
     if (id === 1) {
         const nextWpn = WEAPONS[wpnIndex + 1];
         if (nextWpn && gold >= nextWpn.cost) {
-            gold -= nextWpn.cost;
-            wpnIndex++;
-            playSfx('buy');
+            gold -= nextWpn.cost; wpnIndex++; playSfx('buy');
             addFloatText(player.x, player.y - 30, "ОРУЖИЕ: " + WEAPONS[wpnIndex].name, "#ffd740", 18);
         }
     } else if (id === 2 && gold >= costs.dmg) {
-        gold -= costs.dmg;
-        dmgLevel++;
-        dmgMultiplier += 0.25;
-        costs.dmg = Math.floor(costs.dmg * 1.45);
-        playSfx('buy');
+        gold -= costs.dmg; dmgLevel++; dmgMultiplier += 0.25; costs.dmg = Math.floor(costs.dmg * 1.45); playSfx('buy');
         addFloatText(player.x, player.y - 30, "УРОН УВЕЛИЧЕН!", "#ff5252", 16);
     } else if (id === 3 && gold >= costs.tur) {
-        gold -= costs.tur;
-        costs.tur = Math.floor(costs.tur * 1.3);
-        turrets.push({ x: player.x, y: player.y, angle: 0, cd: 0, range: 320 });
-        playSfx('buy');
+        gold -= costs.tur; costs.tur = Math.floor(costs.tur * 1.3);
+        turrets.push({ x: player.x, y: player.y, angle: 0, cd: 0, range: 320 }); playSfx('buy');
         addFloatText(player.x, player.y - 30, "ТУРЕЛЬ ПОСТАВЛЕНА!", "#00e676", 16);
     } else if (id === 4 && gold >= costs.gen) {
-        gold -= costs.gen;
-        costs.gen = Math.floor(costs.gen * 1.35);
-        passiveIncome += 12;
-        generators.push({ x: player.x, y: player.y, pulse: 0 });
-        playSfx('buy');
+        gold -= costs.gen; costs.gen = Math.floor(costs.gen * 1.35); passiveIncome += 12;
+        generators.push({ x: player.x, y: player.y, pulse: 0 }); playSfx('buy');
         addFloatText(player.x, player.y - 30, "ГЕНЕРАТОР +12$/СЕК!", "#ffd740", 16);
     } else if (id === 5 && gold >= costs.tes) {
-        gold -= costs.tes;
-        costs.tes = Math.floor(costs.tes * 1.4);
-        teslas.push({ x: player.x, y: player.y, cd: 0, bolts: [] });
-        playSfx('buy');
+        gold -= costs.tes; costs.tes = Math.floor(costs.tes * 1.4);
+        teslas.push({ x: player.x, y: player.y, cd: 0, bolts: [] }); playSfx('buy');
         addFloatText(player.x, player.y - 30, "ТЕСЛА АКТИВНА!", "#e040fb", 16);
-    } else if (id === 6 && gold >= 90) {
-        gold -= 90;
-        player.hp = player.maxHp;
-        core.hp = Math.min(core.maxHp, core.hp + 300);
-        playSfx('buy');
-        addFloatText(player.x, player.y - 30, "РЕМОНТ +300 HP ЯДРУ!", "#00e5ff", 16);
+    } else if (id === 6 && gold >= costs.drn) {
+        gold -= costs.drn; costs.drn = Math.floor(costs.drn * 1.35);
+        drones.push({ angle: Math.random() * Math.PI * 2, dist: 65, speed: 2.5, cd: 0 }); playSfx('buy');
+        addFloatText(player.x, player.y - 30, "БОЕВОЙ ДРОН АКТИВИРОВАН!", "#00b0ff", 16);
     }
     updateShopUI();
 }
 
 function spawnEnemy(forcedType) {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 750 + Math.random() * 200;
+    const dist = 800 + Math.random() * 200;
     const x = CORE_POS.x + Math.cos(angle) * dist;
     const y = CORE_POS.y + Math.sin(angle) * dist;
 
     let type = forcedType || 'normal';
     if (!forcedType) {
         const r = Math.random();
-        if (wave >= 3 && r < 0.2) type = 'tank';
+        if (wave >= 4 && r < 0.15) type = 'spider';
+        else if (wave >= 3 && r < 0.25) type = 'kamikaze';
         else if (wave >= 2 && r < 0.5) type = 'runner';
     }
 
     const mult = 1 + (wave - 1) * 0.22;
     if (type === 'runner') {
-        enemies.push({ x, y, hp: 40 * mult, maxHp: 40 * mult, speed: 3.4, radius: 13, color: "#ff5252", reward: 18, dmg: 10, type });
-    } else if (type === 'tank') {
-        enemies.push({ x, y, hp: 190 * mult, maxHp: 190 * mult, speed: 1.35, radius: 24, color: "#ff9100", reward: 45, dmg: 25, type });
+        enemies.push({ x, y, hp: 45 * mult, maxHp: 45 * mult, speed: 3.5, radius: 13, color: "#ff5252", reward: 18, dmg: 10, type });
+    } else if (type === 'kamikaze') {
+        enemies.push({ x, y, hp: 30 * mult, maxHp: 30 * mult, speed: 4.2, radius: 11, color: "#ffea00", reward: 22, dmg: 35, type });
+    } else if (type === 'spider') {
+        enemies.push({ x, y, hp: 210 * mult, maxHp: 210 * mult, speed: 1.6, radius: 26, color: "#00e676", reward: 55, dmg: 20, type });
     } else if (type === 'boss') {
-        enemies.push({ x, y, hp: 900 * mult, maxHp: 900 * mult, speed: 1.15, radius: 38, color: "#e040fb", reward: 220, dmg: 50, type });
+        enemies.push({ x, y, hp: 950 * mult, maxHp: 950 * mult, speed: 1.15, radius: 38, color: "#e040fb", reward: 250, dmg: 50, type });
     } else {
-        enemies.push({ x, y, hp: 65 * mult, maxHp: 65 * mult, speed: 2.1, radius: 16, color: "#69f0ae", reward: 14, dmg: 14, type });
+        enemies.push({ x, y, hp: 70 * mult, maxHp: 70 * mult, speed: 2.2, radius: 16, color: "#69f0ae", reward: 14, dmg: 14, type });
     }
 }
 
@@ -434,32 +474,36 @@ function addFloatText(x, y, text, color, size = 15) {
 }
 
 setInterval(() => {
-    if (gameRunning) gold += passiveIncome;
+    if (gameRunning && !perkChoosing) gold += passiveIncome;
 }, 1000);
 
 // ============================================================================
-// ИГРОВОЙ ЦИКЛ ОБНОВЛЕНИЯ
+// ИГРОВОЙ ЦИКЛ
 // ============================================================================
 let lastTime = performance.now();
 
 function update(dt) {
-    if (!gameRunning) return;
+    if (!gameRunning || perkChoosing) return;
 
     core.angle += dt * 1.5;
     screenShake = Math.max(0, screenShake - dt * 25);
 
-    // Движение игрока (WASD / Стрелки)
+    // Движение с клавиатуры (WASD) или джойстика
     let dx = 0, dy = 0;
     if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
     if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
     if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
     if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
-    if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
 
-    // Если зажата кнопка движения на виртуальном джойстике или WASD
+    if (joystick.active) {
+        dx = joystick.dx; dy = joystick.dy;
+    } else if (dx !== 0 && dy !== 0) {
+        dx *= 0.7071; dy *= 0.7071;
+    }
+
     player.dashCd = Math.max(0, player.dashCd - dt);
     player.dashTime = Math.max(0, player.dashTime - dt);
-    const curSpeed = player.dashTime > 0 ? player.speed * 3.2 : player.speed;
+    const curSpeed = player.dashTime > 0 ? player.speed * 3.4 : player.speed;
 
     player.x = Math.max(60, Math.min(WORLD_SIZE - 60, player.x + dx * curSpeed));
     player.y = Math.max(60, Math.min(WORLD_SIZE - 60, player.y + dy * curSpeed));
@@ -476,7 +520,8 @@ function update(dt) {
         playSfx(wpn.pierce ? 'rail' : 'shoot');
         screenShake = Math.min(6, screenShake + 1.5);
 
-        for (let i = 0; i < wpn.bullets; i++) {
+        const count = player.doubleShot ? wpn.bullets * 2 : wpn.bullets;
+        for (let i = 0; i < count; i++) {
             const spreadAngle = player.angle + (Math.random() - 0.5) * wpn.spread;
             bullets.push({
                 x: player.x + Math.cos(player.angle) * 20,
@@ -492,6 +537,33 @@ function update(dt) {
         }
     }
 
+    // Боевые дроны
+    for (const d of drones) {
+        d.angle += dt * 2.5;
+        d.cd = Math.max(0, d.cd - dt);
+        const dx = player.x + Math.cos(d.angle) * d.dist;
+        const dy = player.y + Math.sin(d.angle) * d.dist;
+        d.x = dx; d.y = dy;
+
+        if (d.cd <= 0) {
+            let nearest = null, minDist = 260;
+            for (const e of enemies) {
+                const dist = Math.hypot(e.x - d.x, e.y - d.y);
+                if (dist < minDist) { minDist = dist; nearest = e; }
+            }
+            if (nearest) {
+                d.cd = 0.45;
+                playSfx('shoot');
+                bullets.push({
+                    x: d.x, y: d.y,
+                    vx: Math.cos(Math.atan2(nearest.y - d.y, nearest.x - d.x)) * 16,
+                    vy: Math.sin(Math.atan2(nearest.y - d.y, nearest.x - d.x)) * 16,
+                    dmg: 25 * dmgMultiplier, color: "#00b0ff", size: 3, pierce: false, life: 1.0
+                });
+            }
+        }
+    }
+
     // Авто-турели
     for (const t of turrets) {
         t.cd = Math.max(0, t.cd - dt);
@@ -503,18 +575,11 @@ function update(dt) {
         if (nearest) {
             t.angle = Math.atan2(nearest.y - t.y, nearest.x - t.x);
             if (t.cd <= 0) {
-                t.cd = 0.38;
-                playSfx('shoot');
+                t.cd = 0.38; playSfx('shoot');
                 bullets.push({
-                    x: t.x + Math.cos(t.angle) * 16,
-                    y: t.y + Math.sin(t.angle) * 16,
-                    vx: Math.cos(t.angle) * 15,
-                    vy: Math.sin(t.angle) * 15,
-                    dmg: 22 * dmgMultiplier,
-                    color: "#00e676",
-                    size: 4,
-                    pierce: false,
-                    life: 1.2
+                    x: t.x + Math.cos(t.angle) * 16, y: t.y + Math.sin(t.angle) * 16,
+                    vx: Math.cos(t.angle) * 15, vy: Math.sin(t.angle) * 15,
+                    dmg: 22 * dmgMultiplier, color: "#00e676", size: 4, pierce: false, life: 1.2
                 });
             }
         }
@@ -527,8 +592,7 @@ function update(dt) {
         if (ts.cd <= 0) {
             const targets = enemies.filter(e => Math.hypot(e.x - ts.x, e.y - ts.y) < 280).slice(0, 3);
             if (targets.length > 0) {
-                ts.cd = 1.1;
-                playSfx('rail');
+                ts.cd = 1.1; playSfx('rail');
                 let prev = { x: ts.x, y: ts.y };
                 for (const trg of targets) {
                     ts.bolts.push({ x1: prev.x, y1: prev.y, x2: trg.x, y2: trg.y, life: 1 });
@@ -550,6 +614,9 @@ function update(dt) {
             const e = enemies[j];
             if (Math.hypot(b.x - e.x, b.y - e.y) < e.radius + b.size) {
                 e.hp -= b.dmg;
+                if (player.vampirism > 0) {
+                    player.hp = Math.min(player.maxHp, player.hp + b.dmg * player.vampirism);
+                }
                 playSfx('hit');
                 for (let k = 0; k < 4; k++) spawnParticle(b.x, b.y, b.color, 0.8);
                 if (!b.pierce) { bullets.splice(i, 1); break; }
@@ -561,9 +628,8 @@ function update(dt) {
     if (enemiesToSpawn > 0) {
         spawnCooldown -= dt;
         if (spawnCooldown <= 0) {
-            spawnEnemy();
-            enemiesToSpawn--;
-            spawnCooldown = Math.max(0.25, 1.1 - wave * 0.06);
+            spawnEnemy(); enemiesToSpawn--;
+            spawnCooldown = Math.max(0.2, 1.0 - wave * 0.05);
         }
     } else if (enemies.length === 0) {
         startWave(wave + 1);
@@ -572,61 +638,55 @@ function update(dt) {
     for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
         if (e.hp <= 0) {
-            kills++;
-            gold += e.reward;
-            playSfx('boom');
+            kills++; gold += e.reward; playSfx('boom');
             screenShake = Math.min(10, screenShake + (e.type === 'boss' ? 8 : 2));
             for (let k = 0; k < 14; k++) spawnParticle(e.x, e.y, e.color, 1.4);
             gems.push({ x: e.x, y: e.y, val: Math.ceil(e.reward * 0.5), life: 12 });
             addFloatText(e.x, e.y, "+$" + e.reward, "#ffd740", 15);
-            enemies.splice(i, 1);
-            continue;
+            enemies.splice(i, 1); continue;
         }
 
         const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
-        const target = distToPlayer < 260 ? player : core;
+        const target = distToPlayer < 280 ? player : core;
         const ang = Math.atan2(target.y - e.y, target.x - e.x);
-        e.x += Math.cos(ang) * e.speed;
-        e.y += Math.sin(ang) * e.speed;
+        e.x += Math.cos(ang) * e.speed; e.y += Math.sin(ang) * e.speed;
+
+        // Взрыв камикадзе
+        if (e.type === 'kamikaze' && distToPlayer < 35) {
+            player.hp -= 35; screenShake = 8;
+            for (let k = 0; k < 15; k++) spawnParticle(e.x, e.y, "#ffea00", 1.5);
+            enemies.splice(i, 1); continue;
+        }
 
         if (Math.hypot(core.x - e.x, core.y - e.y) < core.radius + e.radius) {
-            core.hp -= e.dmg;
-            screenShake = 7;
+            core.hp -= e.dmg; screenShake = 7;
             for (let k = 0; k < 8; k++) spawnParticle(e.x, e.y, "#00e5ff", 1.2);
             if (e.type !== 'boss') { enemies.splice(i, 1); continue; }
             else { e.x -= Math.cos(ang) * 40; e.y -= Math.sin(ang) * 40; }
         }
 
-        if (player.dashTime <= 0 && Math.hypot(player.x - e.x, player.y - e.y) < player.radius + e.radius) {
-            player.hp -= e.dmg * 0.6;
-            screenShake = 6;
-            e.x -= Math.cos(ang) * 28;
-            e.y -= Math.sin(ang) * 28;
+        if (player.dashTime <= 0 && distToPlayer < player.radius + e.radius) {
+            player.hp -= e.dmg * 0.6; screenShake = 6;
+            e.x -= Math.cos(ang) * 28; e.y -= Math.sin(ang) * 28;
         }
     }
 
-    // Кристаллы
     for (let i = gems.length - 1; i >= 0; i--) {
-        const g = gems[i];
-        g.life -= dt;
+        const g = gems[i]; g.life -= dt;
         const d = Math.hypot(player.x - g.x, player.y - g.y);
         if (d < 130) { g.x += (player.x - g.x) * 0.12; g.y += (player.y - g.y) * 0.12; }
         if (d < player.radius + 10) {
-            gold += g.val;
-            playSfx('buy');
-            addFloatText(g.x, g.y, "+$" + g.val, "#00e5ff", 14);
-            gems.splice(i, 1);
+            gold += g.val; playSfx('buy');
+            addFloatText(g.x, g.y, "+$" + g.val, "#00e5ff", 14); gems.splice(i, 1);
         } else if (g.life <= 0) { gems.splice(i, 1); }
     }
 
     for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life -= dt * 2.2;
+        const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life -= dt * 2.2;
         if (p.life <= 0) particles.splice(i, 1);
     }
     for (let i = floatTexts.length - 1; i >= 0; i--) {
-        const ft = floatTexts[i];
-        ft.y -= 35 * dt; ft.life -= dt;
+        const ft = floatTexts[i]; ft.y -= 35 * dt; ft.life -= dt;
         if (ft.life <= 0) floatTexts.splice(i, 1);
     }
 
@@ -643,13 +703,15 @@ function update(dt) {
     if (player.hp <= 0 || core.hp <= 0) {
         gameRunning = false;
         document.getElementById('ov-title').innerText = "БАЗА ПАЛА НА ВОЛНЕ " + wave;
-        document.getElementById('ov-desc').innerText = `Уничтожено мутантов: ${kills}. Попробуй снова и построй больше турелей!`;
+        document.getElementById('ov-desc').innerText = `Уничтожено мутантов: ${kills}. Попробуй снова и выбери другие перки!`;
         document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('perk-container').innerHTML = '';
+        document.getElementById('overlay').querySelector('button').style.display = 'block';
     }
 }
 
 // ============================================================================
-// ОТРИСОВКА ИГРЫ
+// ОТРИСОВКА
 // ============================================================================
 function draw() {
     ctx.fillStyle = '#07090e';
@@ -664,86 +726,64 @@ function draw() {
     ctx.save();
     ctx.translate(-camX, -camY);
 
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.06)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.06)'; ctx.lineWidth = 1;
     const step = 60;
-    for (let x = 0; x <= WORLD_SIZE; x += step) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke();
-    }
-    for (let y = 0; y <= WORLD_SIZE; y += step) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke();
-    }
+    for (let x = 0; x <= WORLD_SIZE; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_SIZE); ctx.stroke(); }
+    for (let y = 0; y <= WORLD_SIZE; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_SIZE, y); ctx.stroke(); }
 
-    ctx.strokeStyle = '#ff1744';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#ff1744'; ctx.lineWidth = 4;
     ctx.strokeRect(40, 40, WORLD_SIZE - 80, WORLD_SIZE - 80);
 
-    ctx.beginPath();
-    ctx.arc(CORE_POS.x, CORE_POS.y, 260, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(CORE_POS.x, CORE_POS.y, 260, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)'; ctx.lineWidth = 2; ctx.stroke();
 
     for (const g of generators) {
         g.pulse += 0.08;
         ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#ffd740'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(g.x, g.y, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#ffd740';
-        ctx.beginPath(); ctx.arc(g.x, g.y, 6 + Math.sin(g.pulse) * 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffd740'; ctx.beginPath(); ctx.arc(g.x, g.y, 6 + Math.sin(g.pulse) * 3, 0, Math.PI * 2); ctx.fill();
     }
 
     for (const ts of teslas) {
         ctx.fillStyle = '#221638'; ctx.strokeStyle = '#e040fb'; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(ts.x, ts.y, 18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-
         for (const b of ts.bolts) {
-            ctx.strokeStyle = `rgba(224, 64, 251, ${b.life})`;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(b.x1, b.y1);
-            ctx.lineTo((b.x1 + b.x2) / 2 + (Math.random() - 0.5) * 20, (b.y1 + b.y2) / 2 + (Math.random() - 0.5) * 20);
-            ctx.lineTo(b.x2, b.y2);
-            ctx.stroke();
+            ctx.strokeStyle = `rgba(224, 64, 251, ${b.life})`; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo((b.x1 + b.x2) / 2 + (Math.random() - 0.5) * 20, (b.y1 + b.y2) / 2 + (Math.random() - 0.5) * 20); ctx.lineTo(b.x2, b.y2); ctx.stroke();
         }
     }
 
     for (const t of turrets) {
-        ctx.save();
-        ctx.translate(t.x, t.y);
-        ctx.rotate(t.angle);
+        ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.angle);
         ctx.fillStyle = '#1b2838'; ctx.strokeStyle = '#00e676'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#00e676'; ctx.fillRect(4, -4, 16, 8);
         ctx.restore();
     }
 
-    ctx.save();
-    ctx.translate(core.x, core.y);
-    ctx.rotate(core.angle);
+    ctx.save(); ctx.translate(core.x, core.y); ctx.rotate(core.angle);
     ctx.shadowBlur = 25; ctx.shadowColor = '#00e5ff';
-    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4;
-    ctx.strokeRect(-28, -28, 56, 56);
+    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 4; ctx.strokeRect(-28, -28, 56, 56);
     ctx.rotate(-core.angle * 2);
-    ctx.fillStyle = '#00b0ff';
-    ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
+    for (const d of drones) {
+        ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(d.x, d.y, 6, 0, Math.PI * 2); ctx.fill();
+    }
+
     for (const g of gems) {
-        ctx.fillStyle = '#00e5ff';
-        ctx.beginPath(); ctx.arc(g.x, g.y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#00e5ff'; ctx.beginPath(); ctx.arc(g.x, g.y, 5, 0, Math.PI * 2); ctx.fill();
     }
 
     for (const b of bullets) {
         ctx.fillStyle = b.color; ctx.shadowBlur = 12; ctx.shadowColor = b.color;
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     }
 
     for (const e of enemies) {
-        ctx.fillStyle = e.color;
-        ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2); ctx.fill();
         ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
-
         if (e.hp < e.maxHp || e.type === 'boss') {
             const w = e.radius * 2.2;
             ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(e.x - w / 2, e.y - e.radius - 12, w, 5);
@@ -751,9 +791,7 @@ function draw() {
         }
     }
 
-    ctx.save();
-    ctx.translate(player.x, player.y);
-    ctx.rotate(player.angle);
+    ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.angle);
     ctx.shadowBlur = 15; ctx.shadowColor = '#00e5ff';
     ctx.fillStyle = player.dashTime > 0 ? '#ffffff' : '#00e5ff';
     ctx.beginPath(); ctx.arc(0, 0, player.radius, 0, Math.PI * 2); ctx.fill();
@@ -761,8 +799,7 @@ function draw() {
     ctx.restore();
 
     for (const p of particles) {
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size);
     }
     ctx.globalAlpha = 1;
 
@@ -774,6 +811,16 @@ function draw() {
     ctx.globalAlpha = 1;
 
     ctx.restore();
+
+    // Отрисовка виртуального джойстика на экране телефона
+    if (joystick.active) {
+        ctx.beginPath(); ctx.arc(joystick.startX, joystick.startY, 50, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.15)'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.beginPath(); ctx.arc(joystick.x, joystick.y, 24, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.5)'; ctx.fill();
+    }
 }
 
 function loop(now) {
