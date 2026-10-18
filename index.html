@@ -137,7 +137,8 @@
     <button class="shop-btn" onclick="buyUpgrade(3)"><span class="key">[3] ТУРЕЛЬ</span><span class="title">Защита</span><span class="cost" id="tur-cost">$120</span></button>
     <button class="shop-btn" onclick="buyUpgrade(4)"><span class="key">[4] ГЕНЕРАТОР</span><span class="title">+12$/сек</span><span class="cost" id="gen-cost">$100</span></button>
     <button class="shop-btn" onclick="buyUpgrade(5)"><span class="key">[5] ТЕСЛА</span><span class="title">Молния</span><span class="cost" id="tes-cost">$250</span></button>
-    <button class="shop-btn" onclick="buyUpgrade(6)"><span class="key">[6] ДРОН</span><span class="title">Боевой дрон</span><span class="cost" id="drn-cost">$300</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(6)"><span class="key">[6] РЕМОНТ</span><span class="title">Лечение базы</span><span class="cost">$90</span></button>
+    <button class="shop-btn" onclick="buyUpgrade(7)"><span class="key">[ДРОН]</span><span class="title">Боевой дрон</span><span class="cost" id="drn-cost">$350</span></button>
 </div>
 
 <div id="dash-btn" onclick="triggerDash()">РЫВОК</div>
@@ -223,12 +224,10 @@ let enemiesToSpawn = 0, spawnCooldown = 0, screenShake = 0;
 let player, core;
 let bullets = [], enemies = [], turrets = [], generators = [], teslas = [], drones = [], particles = [], floatTexts = [], gems = [];
 let wpnIndex = 0, dmgLevel = 1, dmgMultiplier = 1;
-let costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 300 };
+let costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 350 };
 
 const keys = {};
 const mouse = { x: 0, y: 0, down: false };
-
-// Виртуальный джойстик для телефона (Левая сторона экрана)
 let joystick = { active: false, id: null, startX: 0, startY: 0, x: 0, y: 0, dx: 0, dy: 0 };
 
 window.addEventListener('keydown', e => {
@@ -240,6 +239,7 @@ window.addEventListener('keydown', e => {
     if (e.code === 'Digit4') buyUpgrade(4);
     if (e.code === 'Digit5') buyUpgrade(5);
     if (e.code === 'Digit6') buyUpgrade(6);
+    if (e.code === 'Digit7') buyUpgrade(7);
     if (e.code === 'Space') triggerDash();
 });
 window.addEventListener('keyup', e => keys[e.code] = false);
@@ -248,20 +248,17 @@ window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.cli
 window.addEventListener('mousedown', e => { if (e.button === 0) mouse.down = true; });
 window.addEventListener('mouseup', e => { if (e.button === 0) mouse.down = false; });
 
-// Мультитач для телефона (Левый стик + Правая стрельба)
 window.addEventListener('touchstart', e => {
     if (!gameRunning || perkChoosing) return;
     for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (t.clientX < window.innerWidth / 2 && !joystick.active) {
-            joystick.active = true;
-            joystick.id = t.identifier;
+            joystick.active = true; joystick.id = t.identifier;
             joystick.startX = t.clientX; joystick.startY = t.clientY;
             joystick.x = t.clientX; joystick.y = t.clientY;
             joystick.dx = 0; joystick.dy = 0;
         } else {
-            mouse.down = true;
-            mouse.x = t.clientX; mouse.y = t.clientY;
+            mouse.down = true; mouse.x = t.clientX; mouse.y = t.clientY;
         }
     }
 }, {passive: false});
@@ -299,7 +296,7 @@ function startGame() {
     document.getElementById('overlay').style.display = 'none';
     gold = 150; passiveIncome = 5; kills = 0; wave = 1;
     wpnIndex = 0; dmgLevel = 1; dmgMultiplier = 1;
-    costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 300 };
+    costs = { dmg: 80, tur: 120, gen: 100, tes: 250, drn: 350 };
 
     player = {
         x: CORE_POS.x, y: CORE_POS.y + 100,
@@ -321,7 +318,6 @@ function startWave(w) {
     spawnCooldown = 1.0;
     addFloatText(player.x, player.y - 40, "ВОЛНА " + w, "#00e5ff", 22);
     
-    // Каждые 3 волны — выбор перков
     if (w > 1 && (w - 1) % 3 === 0) {
         showPerkChooser();
     } else if (w % 3 === 0) {
@@ -332,21 +328,20 @@ function startWave(w) {
 
 function triggerDash() {
     if (player.dashCd > 0 || perkChoosing) return;
-    player.dashCd = 1.8;
-    player.dashTime = 0.22;
+    player.dashCd = 1.8; player.dashTime = 0.22;
     playSfx('rail');
     for (let i = 0; i < 14; i++) spawnParticle(player.x, player.y, "#00e5ff", 4);
 }
 
 // ============================================================================
-// СИСТЕМА ПЕРКОВ (КАЖДЫЕ 3 ВОЛНЫ)
+// ПЕРКИ
 // ============================================================================
 function showPerkChooser() {
     perkChoosing = true;
     const overlay = document.getElementById('overlay');
     overlay.style.display = 'flex';
     document.getElementById('ov-title').innerText = "ВЫБЕРИТЕ УЛУЧШЕНИЕ";
-    document.getElementById('ov-desc').innerText = "Ваша база выстояла! Получите мощный бонус на выбор:";
+    document.getElementById('ov-desc').innerText = "База выстояла! Выберите мощный бонус:";
 
     const perks = [
         { title: "💉 Нано-Вампиризм", desc: "+12% от нанесеного урона лечит игрока", action: () => { player.vampirism += 0.12; } },
@@ -355,7 +350,6 @@ function showPerkChooser() {
         { title: "💥 Двойной Заряд", desc: "Все пушки и оружие выпускают дополнительный снаряд", action: () => { player.doubleShot = true; } }
     ];
 
-    // Выбираем 3 случайных перка
     perks.sort(() => Math.random() - 0.5);
     const chosen = perks.slice(0, 3);
 
@@ -368,7 +362,6 @@ function showPerkChooser() {
     });
     html += `</div>`;
     
-    // Заменяем кнопку старта на перки
     overlay.querySelector('button').style.display = 'none';
     let perkBox = document.getElementById('perk-container');
     if (!perkBox) {
@@ -427,10 +420,13 @@ function buyUpgrade(id) {
         gold -= costs.tes; costs.tes = Math.floor(costs.tes * 1.4);
         teslas.push({ x: player.x, y: player.y, cd: 0, bolts: [] }); playSfx('buy');
         addFloatText(player.x, player.y - 30, "ТЕСЛА АКТИВНА!", "#e040fb", 16);
-    } else if (id === 6 && gold >= costs.drn) {
+    } else if (id === 6 && gold >= 90) { // РЕМОНТ КАК БЫЛ (Игрок + Ядро)
+        gold -= 90; player.hp = player.maxHp; core.hp = Math.min(core.maxHp, core.hp + 300); playSfx('buy');
+        addFloatText(player.x, player.y - 30, "ПОЛНЫЙ РЕМОНТ +300 HP!", "#00e5ff", 16);
+    } else if (id === 7 && gold >= costs.drn) {
         gold -= costs.drn; costs.drn = Math.floor(costs.drn * 1.35);
         drones.push({ angle: Math.random() * Math.PI * 2, dist: 65, speed: 2.5, cd: 0 }); playSfx('buy');
-        addFloatText(player.x, player.y - 30, "БОЕВОЙ ДРОН АКТИВИРОВАН!", "#00b0ff", 16);
+        addFloatText(player.x, player.y - 30, "БОЕВОЙ ДРОН АКТИВИРОВАН!", "#e040fb", 16);
     }
     updateShopUI();
 }
@@ -488,7 +484,6 @@ function update(dt) {
     core.angle += dt * 1.5;
     screenShake = Math.max(0, screenShake - dt * 25);
 
-    // Движение с клавиатуры (WASD) или джойстика
     let dx = 0, dy = 0;
     if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
     if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
@@ -512,7 +507,6 @@ function update(dt) {
     const camY = player.y - canvas.height / 2;
     player.angle = Math.atan2((mouse.y + camY) - player.y, (mouse.x + camX) - player.x);
 
-    // Стрельба игрока
     player.fireCd = Math.max(0, player.fireCd - dt);
     const wpn = WEAPONS[wpnIndex];
     if (mouse.down && player.fireCd <= 0) {
@@ -537,13 +531,12 @@ function update(dt) {
         }
     }
 
-    // Боевые дроны
+    // Боевые дроны (пурпурного цвета)
     for (const d of drones) {
         d.angle += dt * 2.5;
         d.cd = Math.max(0, d.cd - dt);
-        const dx = player.x + Math.cos(d.angle) * d.dist;
-        const dy = player.y + Math.sin(d.angle) * d.dist;
-        d.x = dx; d.y = dy;
+        d.x = player.x + Math.cos(d.angle) * d.dist;
+        d.y = player.y + Math.sin(d.angle) * d.dist;
 
         if (d.cd <= 0) {
             let nearest = null, minDist = 260;
@@ -558,13 +551,12 @@ function update(dt) {
                     x: d.x, y: d.y,
                     vx: Math.cos(Math.atan2(nearest.y - d.y, nearest.x - d.x)) * 16,
                     vy: Math.sin(Math.atan2(nearest.y - d.y, nearest.x - d.x)) * 16,
-                    dmg: 25 * dmgMultiplier, color: "#00b0ff", size: 3, pierce: false, life: 1.0
+                    dmg: 25 * dmgMultiplier, color: "#e040fb", size: 3, pierce: false, life: 1.0
                 });
             }
         }
     }
 
-    // Авто-турели
     for (const t of turrets) {
         t.cd = Math.max(0, t.cd - dt);
         let nearest = null, minDist = t.range;
@@ -585,7 +577,6 @@ function update(dt) {
         }
     }
 
-    // Башни Тесла
     for (const ts of teslas) {
         ts.cd = Math.max(0, ts.cd - dt);
         ts.bolts = ts.bolts.filter(b => (b.life -= dt * 5) > 0);
@@ -604,7 +595,6 @@ function update(dt) {
         }
     }
 
-    // Движение пуль
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         b.x += b.vx; b.y += b.vy; b.life -= dt;
@@ -624,7 +614,6 @@ function update(dt) {
         }
     }
 
-    // Спавн волн
     if (enemiesToSpawn > 0) {
         spawnCooldown -= dt;
         if (spawnCooldown <= 0) {
@@ -651,7 +640,6 @@ function update(dt) {
         const ang = Math.atan2(target.y - e.y, target.x - e.x);
         e.x += Math.cos(ang) * e.speed; e.y += Math.sin(ang) * e.speed;
 
-        // Взрыв камикадзе
         if (e.type === 'kamikaze' && distToPlayer < 35) {
             player.hp -= 35; screenShake = 8;
             for (let k = 0; k < 15; k++) spawnParticle(e.x, e.y, "#ffea00", 1.5);
@@ -703,7 +691,7 @@ function update(dt) {
     if (player.hp <= 0 || core.hp <= 0) {
         gameRunning = false;
         document.getElementById('ov-title').innerText = "БАЗА ПАЛА НА ВОЛНЕ " + wave;
-        document.getElementById('ov-desc').innerText = `Уничтожено мутантов: ${kills}. Попробуй снова и выбери другие перки!`;
+        document.getElementById('ov-desc').innerText = `Уничтожено мутантов: ${kills}. Попробуй снова!`;
         document.getElementById('overlay').style.display = 'flex';
         document.getElementById('perk-container').innerHTML = '';
         document.getElementById('overlay').querySelector('button').style.display = 'block';
@@ -768,8 +756,11 @@ function draw() {
     ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 
+    // Отрисовка фиолетового дрона
     for (const d of drones) {
-        ctx.fillStyle = '#00b0ff'; ctx.beginPath(); ctx.arc(d.x, d.y, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#e040fb'; ctx.shadowBlur = 10; ctx.shadowColor = '#e040fb';
+        ctx.beginPath(); ctx.arc(d.x, d.y, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
     }
 
     for (const g of gems) {
@@ -812,7 +803,6 @@ function draw() {
 
     ctx.restore();
 
-    // Отрисовка виртуального джойстика на экране телефона
     if (joystick.active) {
         ctx.beginPath(); ctx.arc(joystick.startX, joystick.startY, 50, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(0, 229, 255, 0.15)'; ctx.fill();
